@@ -31,16 +31,16 @@ void complex_print(const void* complex_arg)
     printf("(%d, %d)", complex->Re, complex->Im);
 }
 
-type_info_t* get_complex_type_info()
-{
-    if (complex_type_info == NULL) 
-    {
-        complex_type_info = (type_info_t*)malloc(sizeof(type_info_t));
-        complex_type_info->size = sizeof(int);
-        complex_type_info->summarize = complex_summarize;
-        complex_type_info->multiply = complex_multiply;
-        complex_type_info->print = complex_print;
-    }
+// type_info_t* get_complex_type_info()
+// {
+//     if (complex_type_info == NULL) 
+//     {
+//         complex_type_info = (type_info_t*)malloc(sizeof(type_info_t));
+//         complex_type_info->size = sizeof(int);
+//         complex_type_info->summarize = complex_summarize;
+//         complex_type_info->multiply = complex_multiply;
+//         complex_type_info->print = complex_print;
+//     }
 
-    return complex_type_info;
-}
+//     return complex_type_info;
+// }

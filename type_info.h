@@ -5,14 +5,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef void (*binary_operation)(const void* arg1, const void* arg2, void* result);
+// Букалинский вариант (чет не зашел)
 
-typedef struct 
+// typedef void (*binary_operation)(const void* arg1, const void* arg2, void* result);
+
+// typedef struct 
+// {
+//     size_t size;
+//     void (*summarize)(const void*, const void*, void*);
+//     void (*multiply)(const void*, const void*, void*);;
+//     void (*print)(const void*);
+// } type_info_t;
+
+typedef enum type_info 
 {
-    size_t size;
-    binary_operation summarize;
-    binary_operation multiply;
-    void (*print)(const void*);
+    type_int,
+    type_complex
 } type_info_t;
 
+//А это вариант из Хабра: https://habr.com/ru/articles/568588/
 #endif
