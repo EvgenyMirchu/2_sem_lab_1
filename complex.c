@@ -1,6 +1,6 @@
 #include "complex.h"
 
-static type_info_t* complex_type_info = NULL;
+//static type_info_t* complex_type_info = NULL;
 
 void complex_summarize(const void* complex_arg_1, const void* complex_arg_2, void* result)
 {

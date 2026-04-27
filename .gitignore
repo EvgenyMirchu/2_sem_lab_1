@@ -1,0 +1,8 @@
+.vscode/
+staff_only/
+*.exe
+*.o
+.o/
+*.a
+pdcurses.c
+draft.c

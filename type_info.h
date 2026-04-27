@@ -19,8 +19,8 @@
 
 typedef enum type_info 
 {
-    type_int,
-    type_complex
+    type_int = 0,
+    type_complex = 1
 } type_info_t;
 
 //А это вариант из Хабра: https://habr.com/ru/articles/568588/

@@ -320,4 +320,6 @@ int polynomial_delete(polynomial_t* polynomial, polynomial_errors_t* operation_r
         *operation_result = polynomial_not_defined;
         return NULL;
     }
+    
+    free(polynomial);
 }
