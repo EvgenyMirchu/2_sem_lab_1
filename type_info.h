@@ -5,6 +5,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define INT 0
+#define COMPLEX 1
+
 // Букалинский вариант (чет не зашел)
 
 // typedef void (*binary_operation)(const void* arg1, const void* arg2, void* result);
@@ -19,8 +22,8 @@
 
 typedef enum type_info 
 {
-    type_int = 0,
-    type_complex = 1
+    type_int = INT,
+    type_complex = COMPLEX
 } type_info_t;
 
 //А это вариант из Хабра: https://habr.com/ru/articles/568588/

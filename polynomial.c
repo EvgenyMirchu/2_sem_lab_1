@@ -4,12 +4,13 @@
 typedef struct polynomial
 {
     size_t size;
+    size_t number_of_elements;
     void* start;
     type_info_t* type;
 } polynomial_t;
 
 
-polynomial_t* polynomial_create(type_info_t* type, void* size, polynomial_errors_t* operation_result)
+polynomial_t* polynomial_create(type_info_t* type, void* number_of_elems, polynomial_errors_t* operation_result)
 {
     polynomial_t* polynomial = (polynomial_t*) malloc(sizeof(polynomial_t));
     if (polynomial == NULL)
@@ -17,32 +18,32 @@ polynomial_t* polynomial_create(type_info_t* type, void* size, polynomial_errors
         *operation_result = memory_allocation_failed;
         return NULL;
     }
-
+    polynomial->number_of_elements = number_of_elems;
     polynomial->type = type;
-    polynomial->size = (size_t*) size;
 
     switch (*type)
     {
     case type_int:
-        void* st = calloc((size_t*) size, sizeof(int));
+
+        void* st = calloc(*(short*) number_of_elems, sizeof(int));
         if (st == NULL)
         {
             *operation_result = memory_allocation_failed;
             return NULL;
         }
-
+        polynomial->size = sizeof(*(short*) number_of_elems * sizeof(int));
         polynomial->start = st;
         *operation_result = operation_ok;
         return polynomial;
     
     case type_complex:
-        void* st = calloc((size_t*) size, sizeof(complex_t));
+        void* st = calloc(*(short*) number_of_elems, sizeof(complex_t));
         if (st == NULL)
         {
             *operation_result = memory_allocation_failed;
             return NULL;
         }
-
+        polynomial->size = sizeof(*(short*) number_of_elems * sizeof(complex_t));
         polynomial->start = st;
         *operation_result = operation_ok;
         return polynomial;
@@ -312,7 +313,6 @@ void* polynomial_get_value(const polynomial_t* polynomial, void* x, polynomial_e
     }
 }
 
-
 int polynomial_delete(polynomial_t* polynomial, polynomial_errors_t* operation_result)
 {
     if (polynomial == NULL)
@@ -322,4 +322,57 @@ int polynomial_delete(polynomial_t* polynomial, polynomial_errors_t* operation_r
     }
     
     free(polynomial);
+}
+
+size_t polynomial_get_size(const polynomial_t* polynomial)
+{
+    if (polynomial != NULL)
+    {
+        return polynomial->size;
+    }
+    return 0;
+}
+
+void* polynomial_get_start(const polynomial_t* polynomial)
+{
+    if (polynomial != NULL)
+    {
+        return polynomial->start;
+    }
+    return NULL;
+}
+
+type_info_t* polynomial_get_type(const polynomial_t* polynomial)
+{
+    if (polynomial != NULL)
+    {
+        return &(polynomial->type);
+    }
+    return NULL;
+}
+
+size_t polynomial_get_number_of_elements(const polynomial_t* polynomial)
+{
+    if (polynomial != NULL)
+    {
+        return polynomial->number_of_elements;
+    }
+    return 0;
+}
+
+polynomial_t* polynomial_set_coefficient(const polynomial_t* polynomial, const void* changing_degree, const void* coefficient, polynomial_errors_t* operation_result);
+polynomial_t* polynomial_set_to_null(const polynomial_t* polynomial, polynomial_errors_t* operation_result);
+
+polynomial_t* polynomial_set_different_type(const polynomial_t* polynomial, polynomial_errors_t* operation_result)
+{
+    type_info_t* type = polynomial_get_type(polynomial);
+    if (type == INT)
+    {
+        
+    }
+
+    else
+    {
+
+    }
 }

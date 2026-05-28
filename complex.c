@@ -31,6 +31,17 @@ void complex_print(const void* complex_arg)
     printf("(%d, %d)", complex->Re, complex->Im);
 }
 
+int complex_get_Re(const void* complex_arg)
+{
+    complex_t* complex = (complex_t*)complex_arg;
+    return complex->Re;
+}
+
+int complex_get_Im(const void* complex_arg)
+{
+    complex_t* complex = (complex_t*)complex_arg;
+    return complex->Im;
+}
 // type_info_t* get_complex_type_info()
 // {
 //     if (complex_type_info == NULL) 

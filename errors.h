@@ -11,4 +11,13 @@ typedef enum
     invalid_type = 31
 } polynomial_errors_t;
 
+typedef enum 
+{
+    number_is_ok = 0,
+    number_is_out_of_range = 10,
+    number_is_incorrect = 20,
+    number_is_empty = 21,
+    number_has_extra_chars = 22
+} number_errors_t;
+
 #endif

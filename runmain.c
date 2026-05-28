@@ -4,6 +4,7 @@
 #include "errors.h"
 #include "curses.h"
 #include "runmain.h"
+#include "output.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,96 +12,230 @@
 #include <windows.h>
 #include <locale.h>
 
-#define COLOR_ORANGE 256
-#define COLOR_GRAY 257
-
-#define MENU_NAME_ITEMS 3
-#define MENU_ITEMS 3
-
 
 int main()
 {
     setlocale(LC_ALL, ".utf8"); 
     SetConsoleOutputCP(CP_UTF8);
 
-    initscr();
-    clear();
-    refresh();
-
-    cbreak();               
-    keypad(stdscr, TRUE);
-    noecho();
-
-    int rows = LINES;   
-    int cols = COLS;    
-
+    START
+    
+    int rows = LINES;   // Строки  
+    int cols = COLS;    // Столбцы 
 
     //Цвета
-    int rgb_coefficient = 1000 / 255;
-    if (has_colors()) 
+    set_colors();
+
+    const int menu_name_width = cols / 3;
+    const int guide_width = 2 * cols / 3 + (cols % 3);
+    const int menu_row = 7;
+    const int menu_col= 0;
+
+    WINDOW* menu_name_window = newwin(4, menu_name_width, 2, 0);
+    WINDOW* guide_window = newwin(4, guide_width, 2, menu_name_width);
+    WINDOW* menu_window = newwin(25, cols, menu_row, menu_col);
+    scrollok(menu_window, TRUE);
+
+    polynomial_errors_t* errors_1 = 0;
+    polynomial_errors_t* errors_2 = 0;
+    type_info_t* type_1 = 0;
+    type_info_t* type_2 = 0;
+    polynomial_t* polynomial_1 = polynomial_create(type_1, 16*sizeof(int), errors_1);
+    polynomial_t* polynomial_2 = polynomial_create(type_2, 16*sizeof(int), errors_2);
+
+    if (menu_name_window == NULL | guide_window == NULL | menu_window == NULL)
     {
-        start_color();
-        init_color(256, 1000, 500, 0);        // Оранжевый
-        init_color(257, 500, 500, 500);      // Серый   
-        init_pair(1, COLOR_GREEN, COLOR_BLACK);   // Название меню
-        init_pair(2, COLOR_YELLOW, COLOR_BLACK);    // Подсказки
-        init_pair(3, COLOR_WHITE, COLOR_ORANGE);  // Выделенный текст
-        init_pair(4, COLOR_WHITE, COLOR_BLACK);   // Обычный текст
+        addstr("Ошибка при выделеии памяти для создания окон");
+        END
     }
 
-    int menu_name_width = cols / 3;
-    int guide_width = 2 * cols / 3 + (cols % 3);
-    
-
-    WINDOW* menu_name_window = newwin(4, menu_name_width, 0, 0);
-    WINDOW* guide_window = newwin(4, guide_width, 0, menu_name_width);
-    WINDOW* menu_window = newwin(rows - 6, cols, 4, 0);
-
-    wattron(menu_name_window, COLOR_PAIR(1) | A_BOLD);
-    box(menu_name_window, 0, 0);
-    mvwaddstr(menu_name_window, 1, 2, "ГЛАВНОЕ МЕНЮ");
-    wattroff(menu_name_window, COLOR_PAIR(1));
-    wrefresh(menu_name_window);
-
-    wattron(guide_window, COLOR_PAIR(2));
-    box(guide_window, 0, 0);
-    mvwaddstr(guide_window, 1, 2, "Навигация: стрелки | Выбор: Enter | Выйти: Escape");
-    wattroff(guide_window, COLOR_PAIR(2));
-    wrefresh(guide_window);
-
-    wattron(menu_window, COLOR_PAIR(4));
-    box(menu_window, 0, 0);
-    mvwaddstr(menu_window, 1, 2, "Здесь будет список операций");
-    wattroff(menu_window, COLOR_PAIR(4));
-    wrefresh(menu_window);
-
+    set_menu_name(menu_name_window, 0);
+    guide_menu_print(guide_window);
+    set_menu_main(menu_window, 0);
 
     refresh();
 
-    int ch;
-    while ((ch = getch()) != 27) //Escape = 27
+    short choice_main = 0;
+    short choice_polynomial_1 = 0;
+    short choice_polynomial_2 = 0;
+
+
+    int ch_main;
+    int ch_polynomial_1;
+    int ch_polynomial_2;
+    
+    while (1)                                                  // ГЛАВНОЕ МЕНЮ
     {
-        switch (ch) 
+        ch_main = getch();
+        set_menu_main(menu_window, 0);
+        switch (ch_main) 
         {
             case KEY_UP:
-                mvwaddstr(menu_window, 3, 2, "Нажата стрелка вверх     ");
-                wrefresh(menu_window);
+                if (choice_main > 0)
+                {
+                    choice_main--;
+                    set_menu_main(menu_window, choice_main);
+                } 
                 break;
+
             case KEY_DOWN:
-                mvwaddstr(menu_window, 3, 2, "Нажата стрелка вниз       ");
-                wrefresh(menu_window);
+                if (choice_main < MENU_MAIN_ITEMS-1)
+                {
+                    choice_main++;
+                    set_menu_main(menu_window, choice_main);
+                }   
                 break;
+
+            case KEY_ENTER:
+
+                switch (choice_main)
+                {
+                case 0:                                     //  ПОЛИНОМ 1
+                    choice_polynomial_1 = 0;
+                    set_menu_polynomial_1(menu_window, polynomial_1, choice_polynomial_1);
+
+                    while (1)
+                    {
+                        ch_polynomial_1 = getch();
+                        switch (ch_polynomial_1)
+                        {
+
+                            case KEY_UP:
+                                if (choice_polynomial_1 > 0)
+                                {
+                                    choice_polynomial_1--;
+                                    set_menu_polynomial_1(menu_window, polynomial_1, choice_polynomial_1);
+                                }
+                                break;
+                            
+                            case KEY_DOWN:
+                                if (choice_polynomial_1 < MENU_POLYNOMIAL_ITEMS-3)
+                                {
+                                    choice_polynomial_1++;
+                                    set_menu_polynomial_1(menu_window, polynomial_1, choice_polynomial_1);
+                                }
+                                break;
+
+                            case KEY_ENTER:
+
+                                switch (choice_polynomial_1)
+                                {
+
+                                case 0:                 //ПОМЕНЯТЬ ТИП ДАННЫХ   (ПОЛИНОМ 1)
+                                    polynomial_set_different_type(polynomial_1, errors_1);
+                                    set_menu_different_type_success(menu_window, polynomial_1);
+                                    choice_polynomial_1 = 0;
+                                    set_menu_polynomial_1(menu_window, polynomial_1, choice_polynomial_1);
+                                    break;
+                                
+                                case 1:                 //ИЗМЕНИТЬ КОЭФФИЦИЕНТЫ (ПОЛИНОМ 1)
+                                    break;
+
+                                case 2:                                         //НАЗАД В ГЛАВНОЕ МЕНЮ -|
+                                    goto exit_main_menu_from_polynomial_1_menu; //                      |
+                                    break;                                      //                      |
+                                                                                //                      |
+                                default:                                        //                      |
+                                    break;                                      //                      |
+                                }                                               //                      |
+                                break;                                          //                      |
+                                                                                //                      |
+                            case KEY_ESCAPE:                                    //                      |
+                                END                                             //                      |
+                                break;                                          //                      |
+                                                                                //                      |
+                            default:                                            //                      |
+                                break;                                          //                      |
+                        }                                                       //                      |
+                    }                                                           //                      |
+                    exit_main_menu_from_polynomial_1_menu:    //ВЫХОД ИЗ МЕНЮ ПОЛИНОМА 1 В ГЛАВНОЕ МЕНЮ <-|
+                    choice_polynomial_1 = 0;
+                    choice_main = 0;
+                    break;
+                    
+                case 1:                                 //  ПОЛИНОМ 2
+                    choice_polynomial_2 = 0;
+                    set_menu_polynomial_2(menu_window, polynomial_2, choice_polynomial_2);
+
+                    while (1)
+                    {
+                        ch_polynomial_2 = getch();
+                        switch (ch_polynomial_2)
+                        {
+
+                            case KEY_UP:
+                                if (choice_polynomial_2 > 0)
+                                {
+                                    choice_polynomial_2--;
+                                    set_menu_polynomial_2(menu_window, polynomial_2, choice_polynomial_2);
+                                }
+                                break;
+                            
+                            case KEY_DOWN:
+                                if (choice_polynomial_2 < MENU_POLYNOMIAL_ITEMS-3)
+                                {
+                                    choice_polynomial_2++;
+                                    set_menu_polynomial_2(menu_window, polynomial_2, choice_polynomial_2);
+                                }
+                                break;
+
+                            case KEY_ENTER:
+
+                                switch (choice_polynomial_2)
+                                {
+
+                                case 0:                 //ПОМЕНЯТЬ ТИП ДАННЫХ   (ПОЛИНОМ 2)
+                                    polynomial_set_different_type(polynomial_2, errors_1);
+                                    set_menu_different_type_success(menu_window, polynomial_2);
+                                    choice_polynomial_2 = 0;
+                                    set_menu_polynomial_2(menu_window, polynomial_2, choice_polynomial_2);
+                                    break;
+                                
+                                case 1:                 //ИЗМЕНИТЬ КОЭФФИЦИЕНТЫ (ПОЛИНОМ 2)
+                                    break;
+
+                                case 2:                                         //НАЗАД В ГЛАВНОЕ МЕНЮ -|
+                                    goto exit_main_menu_from_polynomial_2_menu; //                      |
+                                    break;                                      //                      |
+                                                                                //                      |
+                                default:                                        //                      |
+                                    break;                                      //                      |
+                                }                                               //                      |
+                                break;                                          //                      |
+                                                                                //                      |
+                            case KEY_ESCAPE:                                    //                      |
+                                END                                             //                      |
+                                break;                                          //                      |
+                                                                                //                      |
+                            default:                                            //                      |
+                                break;                                          //                      |
+                        }                                                       //                      |
+                    }                                                           //                      |
+                    exit_main_menu_from_polynomial_2_menu:    //ВЫХОД ИЗ МЕНЮ ПОЛИНОМА 1 В ГЛАВНОЕ МЕНЮ <-|
+                    choice_polynomial_2 = 0;
+                    choice_main = 0;
+                    break;
+
+                case 2:                                 //  ОПЕРАЦИИ НАД ПОЛИНОМАМИ
+                    //set_menu_polynomial_operations();
+                    break;
+
+                case 3:                                 //  УЙТИ ПОДАЛЬШЕ ОТСЮДА...
+                    END
+
+                default:
+                    break;
+                }
+
+                break;
+
+            case KEY_ESCAPE:
+                END
+
             default:
-                mvwprintw(menu_window, 3, 2, "Нажата клавиша: %d         ", ch);
-                wrefresh(menu_window);
                 break;
         }
     }
 
-    delwin(menu_name_window);
-    delwin(guide_window);
-    delwin(menu_window);
-    endwin();
-
-    return 0;
+    END
 }

@@ -12,6 +12,8 @@ typedef struct
 
 void complex_summarize(const void* complex_arg_1, const void* complex_arg_2, void* result);
 void complex_multiply(const void* complex_arg_1, const void* complex_arg_2, void* result);
+int complex_get_Re(const void* complex_arg);
+int complex_get_Im(const void* complex_arg);
 void complex_print(const void* data);
 //type_info_t* get_complex_type_info();
 
